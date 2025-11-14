@@ -52,10 +52,8 @@ INSTALLED_APPS = [
 
     # Third-party apps
     'rest_framework',
-    'cities_light',
 ]
 
-CITIES_LIGHT_TRANSLATION_LANGUAGES = ['en']
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

@@ -1,9 +1,9 @@
 from django.db import models
 import uuid
 from django.conf import settings
-from cities_light.models import City, Country
 from django.utils.text import slugify
 from django.utils import timezone
+import random, string
 
 # Create your models here.
 class Category(models.Model):
@@ -22,7 +22,13 @@ class Category(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.name)
+            base_slug = slugify(self.name)
+            slug = base_slug
+            # Handle duplicate slugs
+            while Category.objects.filter(slug=slug).exists():
+                random_str = ''.join(random.choices(string.ascii_lowercase + string.digits, k=4))
+                slug = f"{base_slug}-{random_str}"
+            self.slug = slug
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -36,24 +42,29 @@ class Location(models.Model):
         unique=True,
         editable=False,
     )
-    country = models.ForeignKey(Country, on_delete=models.CASCADE)
-    city = models.ForeignKey(City, on_delete=models.CASCADE)
+    country = models.CharField(max_length=100, null=False, blank=False)
+    city = models.CharField(max_length=100, null=False, blank=False)
+    region = models.CharField(max_length=100, null=True, blank=True)
     is_remote = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         verbose_name = 'Location'
         verbose_name_plural = 'Locations'
-        ordering = ['country', 'city']
+        ordering = ['country', 'city', 'region']
         indexes = [
-            models.Index(fields=['country', 'city']),
+            models.Index(fields=['country', 'city', 'region']),
             models.Index(fields=['is_remote']),
         ]
 
     def __str__(self):
+        parts = [self.country, self.city]
+        if self.region:
+            parts.append(self.region)
+        location_str = ", ".join(parts)
         if self.is_remote:
-            return f"Remote - {self.country.name}"
-        return f"{self.city.name}, {self.country.name}"
+            location_str += " - Remote"
+        return location_str
 
 
 class Company(models.Model):
@@ -63,7 +74,7 @@ class Company(models.Model):
         unique=True,
         editable=False,
     )
-    name = models.CharField(max_length=150)
+    name = models.CharField(max_length=150, unique=True)
     slug = models.SlugField(unique=True, blank=True)
     locations = models.ManyToManyField(Location, related_name='companies')
     description = models.TextField(max_length=500, blank=True, null=True)
@@ -91,7 +102,13 @@ class Company(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.name)
+            base_slug = slugify(self.description)
+            slug = base_slug
+            # Handle duplicate slugs
+            while Company.objects.filter(slug=slug).exists():
+                random_str = ''.join(random.choices(string.ascii_lowercase + string.digits, k=4))
+                slug = f"{base_slug}-{random_str}"
+            self.slug = slug
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -166,12 +183,12 @@ class Job(models.Model):
     def save(self, *args, **kwargs):
         if not self.slug:
             base_slug = slugify(f"{self.title}-{self.company.name}")
-            self.slug = base_slug
+            slug = base_slug
             # Handle duplicate slugs
-            counter = 1
             while Job.objects.filter(slug=self.slug).exists():
-                self.slug = f"{base_slug}-{counter}"
-                counter += 1
+                random_str = ''.join(random.choices(string.ascii_lowercase + string.digits, k=4))
+                slug = f"{base_slug}-{random_str}"
+            self.slug = slug
         super().save(*args, **kwargs)
 
     @property
