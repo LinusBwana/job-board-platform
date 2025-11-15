@@ -65,7 +65,7 @@ class Application(models.Model):
         ]
 
     def __str__(self):
-        return f"{self.job.category.name} applied on {self.applied_on}. Stage: {self.status})"
+        return f"{self.job.company.name} - {self.job.title} applied on {self.applied_on}. Stage: {self.status})"
     
 
 class ApplicationHistory(models.Model):

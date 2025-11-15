@@ -20,6 +20,10 @@ class Industry(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        verbose_name = 'Industry'
+        verbose_name_plural = 'Industries'
+    
     def save(self, *args, **kwargs):
         if not self.slug:
             base_slug = slugify(self.name)
@@ -215,4 +219,4 @@ class Job(models.Model):
         return []
 
     def __str__(self):
-        return f"{self.category.name} - {self.title}. Deadline is on {self.application_deadline}"
+        return f"{self.company.name} - {self.title}. Deadline is on {self.application_deadline}"

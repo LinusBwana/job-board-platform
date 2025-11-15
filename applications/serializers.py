@@ -1,6 +1,6 @@
 from rest_framework import serializers
-from .models import Application, ApplicationHistory
-from jobs.serializers import JobSerializer, LocationSerializer
+from .models import Application
+from jobs.serializers import JobSerializer
 
 class ApplicationSerializer(serializers.ModelSerializer):
     class Meta:
