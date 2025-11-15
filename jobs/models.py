@@ -44,7 +44,7 @@ class Location(models.Model):
     )
     country = models.CharField(max_length=100, null=False, blank=False)
     city = models.CharField(max_length=100, null=False, blank=False)
-    region = models.CharField(max_length=100, null=True, blank=True)
+    region = models.CharField(max_length=100, null=False, blank=False)
     is_remote = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 

@@ -1,8 +1,13 @@
 from django.db import models
 import uuid
-import jobs
 from jobs.models import Job
 from django.conf import settings
+
+# save application documents in different directories for each user
+def user_directory_path(instance, filename):
+    # instance: the Application object
+    # instance.applicant is the user
+    return f'application_documents/user_{instance.applicant.id}/{filename}'
 
 # Create your models here.
 class Application(models.Model):
@@ -19,7 +24,7 @@ class Application(models.Model):
         unique=True,
         editable=False,
     )
-    job = models.ForeignKey(Job, on_delete=models.CASCADE, related_name='jobs')
+    job = models.ForeignKey(Job, on_delete=models.CASCADE, related_name='applications')
     applicant = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     status = models.CharField(
         choices=status_choices,
@@ -28,19 +33,19 @@ class Application(models.Model):
     )
     cover_letter = models.TextField()
     resume = models.FileField(
-        upload_to='application_documents/settings.AUTH_USER_MODEL/',
+        upload_to=user_directory_path,
         blank=False, 
         null=False,
     )
     additional_documents = models.FileField(
-        upload_to='application_documents/settings.AUTH_USER_MODEL/',
+        upload_to=user_directory_path,
         blank=True, 
         null=True,
     )
     experience_years = models.PositiveIntegerField(default=0)
     expected_salary = models.DecimalField(max_digits=10, decimal_places=2, 
                                           blank=False, null=False)
-    availabilty_date = models.DateField()
+    availability_date = models.DateField()
     reviewed_by = models.ForeignKey(settings.AUTH_USER_MODEL,
                                     on_delete=models.SET_NULL, 
                                     null=True, related_name='reviewed_applications')
@@ -63,16 +68,17 @@ class Application(models.Model):
         return f"{self.job.category.name} applied on {self.applied_on}. Stage: {self.status})"
     
 
-class ApplicationStatusHistory(models.Model):
+class ApplicationHistory(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, 
                           editable=False, unique=True)
-    application = models.ForeignKey(Application, on_delete=models.CASCADE, related_name='status_history')
+    application = models.ForeignKey(Application,
+                                    on_delete=models.CASCADE,
+                                    related_name='status_history')
     status = models.CharField(max_length=50)
-    notes = models.TextField(blank=True, null=True)
 
     class Meta:
-        verbose_name = "Application Status History"
-        verbose_name_plural = "Application Status Histories"
+        verbose_name = "Application History"
+        verbose_name_plural = "Application Histories"
         indexes = [
             models.Index(fields=['application']),
             models.Index(fields=['status']),
