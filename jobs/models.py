@@ -15,7 +15,7 @@ class Industry(models.Model):
     )
     name = models.CharField(max_length=100, blank=False)
     slug = models.SlugField(unique=True, blank=True)
-    description = models.TextField(max_length=500, blank=True, null=True)
+    description = models.TextField(max_length=500, blank=False, null=False)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -51,6 +51,10 @@ class Location(models.Model):
     region = models.CharField(max_length=100, null=False, blank=False)
     is_remote = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+        related_name='created_locations',null=True, blank=True
+        )
 
     class Meta:
         verbose_name = 'Location'
@@ -92,6 +96,10 @@ class Company(models.Model):
     is_verified = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, 
+        related_name='created_companies', null=True, blank=True
+        )
 
     class Meta:
         verbose_name = 'Company'

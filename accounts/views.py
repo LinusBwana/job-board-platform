@@ -9,6 +9,7 @@ from rest_framework.response import Response
 class RegisterViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
     queryset = User.objects.all()
     serializer_class = RegisterUserSerializer
+    permission_classes = [AllowAny]
 
 
 class LoginViewSet(viewsets.ViewSet):
