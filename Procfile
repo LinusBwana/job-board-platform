@@ -1,0 +1,1 @@
+web: gunicorn job_board_backend.wsgi
