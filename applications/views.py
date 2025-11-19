@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework import viewsets
 from .serializers import ApplyJobSerializer, ApplicantHistorySerializer, EmployerApplicationSerializer
-from .models import ApplicationHistory, ApplyJob
+from .models import ApplyJob
 from .permissions import IsAuthenticatedToApply, IsApplicantOwner, IsJobOwner
 from rest_framework.permissions import IsAuthenticated
 

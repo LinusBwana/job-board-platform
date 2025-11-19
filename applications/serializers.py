@@ -1,6 +1,5 @@
 from rest_framework import serializers
 from .models import ApplyJob
-from .models import ApplyJob
 
 class ApplyJobSerializer(serializers.ModelSerializer):
     class Meta:
