@@ -4,6 +4,7 @@ from django.conf import settings
 from django.utils.text import slugify
 from django.utils import timezone
 import random, string
+from django.core.cache import cache
 
 # Create your models here.
 class Industry(models.Model):
@@ -203,7 +204,7 @@ class Job(models.Model):
                 slug = f"{base_slug}-{random_str}"
             self.slug = slug
         super().save(*args, **kwargs)
-
+        
     @property
     def is_expired(self):
         if self.application_deadline:

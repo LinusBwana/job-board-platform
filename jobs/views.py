@@ -1,11 +1,11 @@
-from django.shortcuts import render
 from rest_framework import viewsets
 from .serializers import IndustrySerializer, LocationSerializer, CompanySerializer, PostJobSerializer, AvailableJobsSerializer
 from .models import Industry, Location, Company, Job
-from rest_framework import filters
-from django_filters.rest_framework import DjangoFilterBackend
 from .permissions import IsAdminUser, IsEmployer, IsLocationOwner, IsCompanyOwner, IsJobOwner
 from .throttles import CustomUserThrottle
+from django.views.decorators.cache import cache_page
+from django.views.decorators.vary import vary_on_headers
+from django.utils.decorators import method_decorator
 
 # Create your views here.
 class IndustryViewset(viewsets.ModelViewSet):
@@ -62,7 +62,7 @@ class PostJobViewset(viewsets.ModelViewSet):
     serializer_class = PostJobSerializer
     permission_classes = [IsEmployer, IsJobOwner]
     throttle_classes = [CustomUserThrottle]
-    # For general keyword sear
+    # For general keyword searh
     search_fields = ['title', 'slug', 'industry__name', 'locations__country', 
                      'locations__region', 'description', 'experience_level', 
                      'requirements', 'responsibilities', 'skills_required']
