@@ -116,7 +116,7 @@ class Company(models.Model):
     def save(self, *args, **kwargs):
         if not self.slug:
             # Use name + first 30 chars of description
-            base_slug = f"{self.name} {self.description[:30]}"
+            base_slug = slugify(self.name)
             slug = base_slug
             # Handle duplicate slugs
             while Company.objects.filter(slug=slug).exists():
@@ -197,7 +197,7 @@ class Job(models.Model):
     def save(self, *args, **kwargs):
         if not self.slug:
             base_slug = slugify(f"{self.title}-{self.company.name}")
-            slug = base_slug
+            slug = base_slug[:50]
             # Handle duplicate slugs
             while Job.objects.filter(slug=slug).exists():
                 random_str = ''.join(random.choices(string.ascii_lowercase + string.digits, k=4))

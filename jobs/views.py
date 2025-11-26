@@ -1,7 +1,7 @@
 from rest_framework import viewsets
 from .serializers import IndustrySerializer, LocationSerializer, CompanySerializer, PostJobSerializer, AvailableJobsSerializer
 from .models import Industry, Location, Company, Job
-from .permissions import IsAdminUser, IsEmployer, IsLocationOwner, IsCompanyOwner, IsJobOwner
+from .permissions import IsAdminOrEmployer, IsEmployer, IsLocationOwner, IsCompanyOwner, IsJobOwner
 from .throttles import CustomUserThrottle
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_headers
@@ -11,7 +11,7 @@ from django.utils.decorators import method_decorator
 class IndustryViewset(viewsets.ModelViewSet):
     queryset = Industry.objects.all()
     serializer_class = IndustrySerializer
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAdminOrEmployer]
     # For general keyword search
     search_fields = ['name', 'slug', 'description']
 
@@ -77,12 +77,14 @@ class PostJobViewset(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         company = serializer.validated_data.get("company")
         industry = company.industry
-        # Automatically set posted_by
-        # Permission class already checks for company ownership requirement
-        serializer.save(
-            posted_by=self.request.user,
-            industry=industry
+        locations = company.locations.all()  # get all locations
+        # Save the job instance first
+        job = serializer.save(
+            posted_by=self.request.user, # Automatically set posted_by and industry
+            industry=industry, # Automatically industry
             )
+        # Assign locations AFTER saving
+        job.location.set(locations)  # .set() works for ManyToMany
 
 
 class AvailableJobsViewset(viewsets.ReadOnlyModelViewSet):

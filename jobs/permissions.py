@@ -6,6 +6,20 @@ class IsAdminUser(BasePermission):
         return (request.user and request.user.is_authenticated 
                 and (request.user.is_staff or request.user.role == 'admin'))
     
+
+class IsAdminOrEmployer(BasePermission):
+    def has_permission(self, request, view):
+        if (not request.user or not request.user.is_authenticated):
+            return False
+
+        if request.method == 'GET' and request.user.role == 'employer':
+            return True
+        
+        if (request.user.is_staff or request.user.role == 'admin'):
+            return True
+        
+        return False
+   
     
 class IsEmployer(BasePermission):
     # Only authenticated users with 'employer' role can access
