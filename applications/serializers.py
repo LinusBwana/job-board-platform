@@ -6,6 +6,17 @@ class ApplyJobSerializer(serializers.ModelSerializer):
         model = ApplyJob
         fields = '__all__'
         read_only_fields = ['id', 'applicant', 'status', 'reviewed_by', 'reviewed_at', 'applied_on', 'resume']
+    
+    def validate_job(self, value):
+        request = self.context['request']
+        applicant = request.user
+
+        if ApplyJob.objects.filter(job=value, applicant=applicant).exists():
+            raise serializers.ValidationError(
+                {"detail": "You have already applied for this job."}
+            )
+
+        return value
 
 class ApplicantHistorySerializer(serializers.ModelSerializer):
     job_title = serializers.CharField(source='job.title')

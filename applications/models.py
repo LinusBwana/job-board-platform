@@ -64,5 +64,12 @@ class ApplyJob(models.Model):
             models.Index(fields=['applied_on']),
         ]
 
+        constraints = [
+            models.UniqueConstraint(
+            fields=['job', 'applicant'],
+            name='unique_job_application'
+            )
+        ]
+
     def __str__(self):
         return f"{self.job.company.name} - {self.job.title} applied on {self.applied_on}. Stage: {self.status})"
