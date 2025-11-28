@@ -40,8 +40,8 @@ class CompanyViewset(viewsets.ModelViewSet):
     serializer_class = CompanySerializer
     permission_classes = [IsEmployer, IsCompanyOwner]
     # For general keyword search
-    search_fields = ['name', 'slug', 'industry', 'locations__country', 
-                     'locations__region', 'locations__city', 'description', 
+    search_fields = ['name', 'slug', 'industry', 'location__country', 
+                     'location__region', 'location__city', 'description', 
                      'website_url']
     
     def get_queryset(self):
@@ -63,8 +63,8 @@ class PostJobViewset(viewsets.ModelViewSet):
     permission_classes = [IsEmployer, IsJobOwner]
     throttle_classes = [CustomUserThrottle]
     # For general keyword searh
-    search_fields = ['title', 'slug', 'industry__name', 'locations__country', 
-                     'locations__region', 'description', 'experience_level', 
+    search_fields = ['title', 'slug', 'industry__name', 'location__country', 
+                     'location__region', 'description', 'experience_level', 
                      'requirements', 'responsibilities', 'skills_required']
     
     def get_queryset(self):
@@ -91,6 +91,6 @@ class AvailableJobsViewset(viewsets.ReadOnlyModelViewSet):
     queryset = Job.objects.all()
     serializer_class = AvailableJobsSerializer
     # For general keyword sear
-    search_fields = ['title', 'slug', 'industry__name', 'locations__country', 
-                     'locations__region', 'description', 'experience_level', 
+    search_fields = ['title', 'slug', 'industry__name', 'location__country', 
+                     'location__region', 'description', 'experience_level', 
                      'requirements', 'responsibilities', 'skills_required']

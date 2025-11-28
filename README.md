@@ -100,13 +100,38 @@ The API will be available at `http://localhost:8000/`
 ```python
 from django.contrib import admin
 from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
+from rest_framework import permissions
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+
+schema_view = get_schema_view(
+   openapi.Info(
+      title="ALX Project Nexus",
+      default_version='v1',
+      description="Backend for a Job Board Platform - ProDev BE",
+   ),
+   public=True,
+   permission_classes=(permissions.AllowAny,),
+)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('accounts.urls')),
-    path('', include('applications.urls')),
-    path('', include('jobs.urls')),
+    path('api/auth/', include('accounts.urls')),
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('api/jobs/', include('jobs.urls')),
+    path('api/applications/', include('applications.urls')),
+
+    # Swagger urls
+    path('api/docs/.<format>/', schema_view.without_ui(cache_timeout=0), name='schema-json'),
+    path('api/docs/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 ]
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 ```
 
 ### Accounts App URLs
@@ -116,16 +141,13 @@ urlpatterns = [
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import RegisterViewSet, LoginViewSet
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 router = DefaultRouter()
 router.register(r'register', RegisterViewSet, basename='register')
 router.register(r'login', LoginViewSet, basename='login')
 
 urlpatterns = [
-    path('api/auth/', include(router.urls)), 
-    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('', include(router.urls)), 
 ]
 ```
 
@@ -151,33 +173,33 @@ router.register(r'postjobs', PostJobViewset, basename='postjobs')
 router.register(r'availablejobs', AvailableJobsViewset, basename='availablejobs')
 
 urlpatterns = [
-    path('api/', include(router.urls)),
+    path('', include(router.urls)),
 ]
 ```
 
 **Endpoints:**
-- `GET /api/industries/` - List all industries (Admin only)
-- `POST /api/industries/` - Create industry (Admin only)
-- `GET /api/industries/{id}/` - Retrieve industry (Admin only)
-- `PUT/PATCH /api/industries/{id}/` - Update industry (Admin only)
-- `DELETE /api/industries/{id}/` - Delete industry (Admin only)
-- `GET /api/locations/` - List user's locations (Employer only)
-- `POST /api/locations/` - Create location (Employer only)
-- `GET /api/locations/{id}/` - Retrieve location (Employer only)
-- `PUT/PATCH /api/locations/{id}/` - Update location (Employer only)
-- `DELETE /api/locations/{id}/` - Delete location (Employer only)
-- `GET /api/companies/` - List user's companies (Employer only)
-- `POST /api/companies/` - Create company (Employer only)
-- `GET /api/companies/{id}/` - Retrieve company (Employer only)
-- `PUT/PATCH /api/companies/{id}/` - Update company (Employer only)
-- `DELETE /api/companies/{id}/` - Delete company (Employer only)
-- `GET /api/postjobs/` - List user's posted jobs (Employer only)
-- `POST /api/postjobs/` - Create job posting (Employer only)
-- `GET /api/postjobs/{id}/` - Retrieve job (Employer only)
-- `PUT/PATCH /api/postjobs/{id}/` - Update job (Employer only)
-- `DELETE /api/postjobs/{id}/` - Delete job (Employer only)
-- `GET /api/availablejobs/` - List all active jobs (Public)
-- `GET /api/availablejobs/{id}/` - Retrieve job details (Public)
+- `GET /api/jobs/industries/` - List all industries (Admin only)
+- `POST /api/jobs/industries/` - Create industry (Admin only)
+- `GET /api/jobs/industries/{id}/` - Retrieve industry (Admin only)
+- `PUT/PATCH /api/jobs/industries/{id}/` - Update industry (Admin only)
+- `DELETE /api/jobs/industries/{id}/` - Delete industry (Admin only)
+- `GET /api/jobs/locations/` - List user's locations (Employer only)
+- `POST /api/jobs/locations/` - Create location (Employer only)
+- `GET /api/jobs/locations/{id}/` - Retrieve location (Employer only)
+- `PUT/PATCH /api/jobs/locations/{id}/` - Update location (Employer only)
+- `DELETE /api/jobs/locations/{id}/` - Delete location (Employer only)
+- `GET /api/jobs/companies/` - List user's companies (Employer only)
+- `POST /api/jobs/companies/` - Create company (Employer only)
+- `GET /api/jobs/companies/{id}/` - Retrieve company (Employer only)
+- `PUT/PATCH /api/jobs/companies/{id}/` - Update company (Employer only)
+- `DELETE /api/jobs/companies/{id}/` - Delete company (Employer only)
+- `GET /api/jobs/postjobs/` - List user's posted jobs (Employer only)
+- `POST /api/jobs/postjobs/` - Create job posting (Employer only)
+- `GET /api/jobs/postjobs/{id}/` - Retrieve job (Employer only)
+- `PUT/PATCH /api/jobs/postjobs/{id}/` - Update job (Employer only)
+- `DELETE /api/jobs/postjobs/{id}/` - Delete job (Employer only)
+- `GET /api/jobs/availablejobs/` - List all active jobs (Public)
+- `GET /api/jobs/availablejobs/{id}/` - Retrieve job details (Public)
 
 ### Applications App URLs
 
@@ -193,17 +215,17 @@ router.register(r'my-applications-history', MyApplicationHistoryViewset, basenam
 router.register(r'job-applications-history', JobApplicationsHistoryViewset, basename='job-applications')
 
 urlpatterns = [
-    path('api/', include(router.urls)),
+    path('', include(router.urls)),
 ]
 ```
 
 **Endpoints:**
-- `POST /api/apply-job/` - Submit job application (Job Seeker only)
-- `GET /api/my-applications-history/` - View own applications (Job Seeker only)
-- `GET /api/my-applications-history/{id}/` - View application details (Job Seeker only)
-- `GET /api/job-applications-history/` - View applications to own jobs (Employer only)
-- `GET /api/job-applications-history/{id}/` - View application details (Employer only)
-- `PUT/PATCH /api/job-applications-history/{id}/` - Update application status (Employer only)
+- `POST /api/applications/apply-job/` - Submit job application (Job Seeker only)
+- `GET /api/applications/my-applications-history/` - View own applications (Job Seeker only)
+- `GET /api/applications/my-applications-history/{id}/` - View application details (Job Seeker only)
+- `GET /api/applications/job-applications-history/` - View applications to own jobs (Employer only)
+- `GET /api/applications/job-applications-history/{id}/` - View application details (Employer only)
+- `PUT/PATCH /api/applications/job-applications-history/{id}/` - Update application status (Employer only)
 
 ## API Request and Response Examples
 
@@ -270,7 +292,7 @@ urlpatterns = [
 ### Jobs App
 
 #### List Available Jobs (GET - Public)
-**Endpoint:** `GET /api/availablejobs/`
+**Endpoint:** `GET /api/jobs/availablejobs/`
 
 **Response:** `200 OK`
 ```json
@@ -325,7 +347,7 @@ urlpatterns = [
 ```
 
 #### Create Industry (POST - Admin Only)
-**Endpoint:** `POST /api/industries/`
+**Endpoint:** `POST /api/jobs/industries/`
 
 **Headers:**
 ```
@@ -361,7 +383,7 @@ Authorization: Bearer {access_token}
 ```
 
 #### Create Location (POST - Employer Only)
-**Endpoint:** `POST /api/locations/`
+**Endpoint:** `POST /api/jobs/locations/`
 
 **Headers:**
 ```
@@ -391,7 +413,7 @@ Authorization: Bearer {access_token}
 ```
 
 #### Get User's Locations (GET - Employer Only)
-**Endpoint:** `GET /api/locations/`
+**Endpoint:** `GET /api/jobs/locations/`
 
 **Headers:**
 ```
@@ -421,7 +443,7 @@ Authorization: Bearer {access_token}
 ```
 
 #### Create Company (POST - Employer Only)
-**Endpoint:** `POST /api/companies/`
+**Endpoint:** `POST /api/jobs/companies/`
 
 **Headers:**
 ```
@@ -466,7 +488,7 @@ Content-Type: multipart/form-data
 ```
 
 #### Post Job (POST - Employer Only)
-**Endpoint:** `POST /api/postjobs/`
+**Endpoint:** `POST /api/jobs/postjobs/`
 
 **Headers:**
 ```
@@ -530,7 +552,7 @@ Authorization: Bearer {access_token}
 ### Applications App
 
 #### Apply for Job (POST - Job Seeker Only)
-**Endpoint:** `POST /api/apply-job/`
+**Endpoint:** `POST /api/applications/apply-job/`
 
 **Headers:**
 ```
@@ -578,7 +600,7 @@ Content-Type: multipart/form-data
 ```
 
 #### Get My Applications (GET - Job Seeker Only)
-**Endpoint:** `GET /api/my-applications-history/`
+**Endpoint:** `GET /api/applications/my-applications-history/`
 
 **Headers:**
 ```
@@ -613,7 +635,7 @@ Authorization: Bearer {access_token}
 ```
 
 #### Get Applications to My Jobs (GET - Employer Only)
-**Endpoint:** `GET /api/job-applications-history/`
+**Endpoint:** `GET /api/applications/job-applications-history/`
 
 **Headers:**
 ```
@@ -655,7 +677,7 @@ Authorization: Bearer {access_token}
 ```
 
 #### Update Application Status (PATCH - Employer Only)
-**Endpoint:** `PATCH /api/job-applications-history/{application_id}/`
+**Endpoint:** `PATCH /api/applications/job-applications-history/{application_id}/`
 
 **Headers:**
 ```
@@ -750,10 +772,10 @@ When the access token expires, use the refresh token to obtain a new one:
 Search functionality is available on multiple endpoints:
 
 ```bash
-GET /api/availablejobs/?search=python+developer
-GET /api/availablejobs/?search=remote
-GET /api/companies/?search=tech
-GET /api/postjobs/?search=senior+engineer
+GET /api/jobs/availablejobs/?search=python+developer
+GET /api/jobs/availablejobs/?search=remote
+GET /api/jobs/companies/?search=tech
+GET /api/jobs/postjobs/?search=senior+engineer
 ```
 
 ## Status Codes
@@ -779,7 +801,7 @@ GET /api/postjobs/?search=senior+engineer
 ## Swagger Documentation
 
 Interactive API documentation is available at:
-- Swagger UI: `http://localhost:8000/swagger/`
+- Swagger UI: `http://localhost:8000/api/docs/`
 - ReDoc: `http://localhost:8000/redoc/`
 
 ## Contributing
