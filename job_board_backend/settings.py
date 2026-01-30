@@ -32,7 +32,7 @@ SECRET_KEY = config('SECRET_KEY')
 DEBUG = config('DEBUG', cast=bool)
 
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='*', cast=Csv())
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=Csv())
 
 CSRF_TRUSTED_ORIGINS = config(
     'CSRF_TRUSTED_ORIGINS',
@@ -237,5 +237,5 @@ SWAGGER_SETTINGS = {
             'description': 'JWT Authorization header'
         }
     },
-    'DEFAULT_API_URL': 'https://job-board-platform-backend-930e.up.railway.app',
+    'DEFAULT_API_URL': 'https://job-board-platform-production-7536.up.railway.app',
 }
